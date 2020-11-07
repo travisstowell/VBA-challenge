@@ -1,0 +1,102 @@
+Sub StockAnalysis()
+
+For Each ws In Worksheets
+
+    ' Set variables
+    Dim Ticker As String
+    Dim Stock_Volume As Double
+    Dim Opening_Price As Double
+    Dim Closing_Price As Double
+    Dim Yearly_Change As Double
+    Dim Percent_Change As Double
+    Dim Range_Count As Long
+    Dim Summary_Table_Row As Long
+    Summary_Table_Row = 2
+
+    ' Determine number of rows for the sheet
+        RowNum = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    ' Creating headers for new data table
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+
+    ' Loop through all stock data
+    For i = 2 To RowNum
+
+    If ws.Cells(i, 1).Value = ws.Cells(i + 1, 1) Then
+        Range_Count = Range_Count + 1
+        
+        'Add to the Stock Total
+        Stock_Volume = Stock_Volume + ws.Cells(i, 7).Value
+    
+    'Check if we are still within the same stock
+    ElseIf ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+    
+    'Set the Stock Ticker
+    Ticker = ws.Cells(i, 1).Value
+    
+    'Add the Stock Volume
+    Stock_Volume = Stock_Volume + ws.Cells(i, 7).Value
+    
+    'Grab Closing Price
+    Closing_Price = ws.Cells(i, 6).Value
+    
+    'Grab Opening Price
+    Opening_Price = ws.Cells(i - Range_Count, 3).Value
+     
+    'Print the Ticker To The Summary Table
+    ws.Range("I" & Summary_Table_Row).Value = Ticker
+    
+    'Print the Stock Volume
+    ws.Range("L" & Summary_Table_Row).Value = Stock_Volume
+    
+    'Print the Yearly Change To The Summary Table
+    If Opening_Price <> 0 Then
+    ws.Range("J" & Summary_Table_Row).Value = Closing_Price - Opening_Price
+    Else: Opening_Price = 0
+    End If
+    
+    'Print the Percent Change To The Summary Table
+    If Opening_Price <> 0 Then
+    Percent_Change = ((Closing_Price - Opening_Price) / Opening_Price)
+    ws.Range("K" & Summary_Table_Row).Value = FormatPercent(Percent_Change)
+    Else: Percent_Change = 0
+    End If
+    
+    
+    'Print Opening & Closing Prices (Temp Testing Only)
+    'ws.Range("N" & Summary_Table_Row).Value = Closing_Price
+    'ws.Range("O" & Summary_Table_Row).Value = Opening_Price
+    
+    'Add one to the summary table row
+    Summary_Table_Row = Summary_Table_Row + 1
+    
+    'Reset the Stock_Volume
+    Stock_Volume = 0
+    Range_Count = 0
+             
+    End If
+    
+    Next i
+    
+    Last_Summary_Table_Row = ws.Cells(Rows.Count, "I").End(xlUp).Row
+    For a = 2 To Last_Summary_Table_Row
+    ' Conditional to change cell color for positive or negative change
+    If ws.Cells(a, 11).Value > 0 Then
+        ' Color Code
+        ws.Cells(a, 11).Interior.ColorIndex = 4
+    ElseIf ws.Cells(a, 11).Value < 0 Then
+        ' Color Code
+        ws.Cells(a, 11).Interior.ColorIndex = 3
+    End If
+Next a
+    
+Next ws
+
+End Sub
+    
+
+
+
